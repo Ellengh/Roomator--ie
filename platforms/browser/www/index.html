@@ -1,0 +1,209 @@
+<html lang="en">
+	<head>
+		<title>Roomator </title>
+        
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<!-- <link rel="stylesheet" href="css/jquery.mobile-1.3.1.min.css"> -->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/jquery.mobile-1.3.2.min.js"></script>
+		<!--   <script src="js/mobile.min.js"></script> -->
+		<link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
+		<style>
+		label{color:white; display: block}
+		</style>
+		
+	</body>
+</html>
+<script type="text/javascript">
+	
+$.get("http://ipinfo.io", function(response)
+{
+
+document.getElementById("city").value =(response.city);}, "jsonp");
+</script>
+<script>
+var session_id = sessionStorage.getItem("loginId");
+var session_username =  sessionStorage.getItem("loginUsername");
+if (typeof session_id !== 'undefined' && session_id !== null )
+{
+
+window.location.href = "new.html";
+}
+else
+{
+//document.write("Sesion Blanks");
+}
+</script>
+<script>
+
+function saveData(){
+var db;
+db = window.openDatabase("infonic","1.0","My DataBase",2*1024*1024);
+var name = email = password = age = smoker = "" ;
+var name = document.getElementById('name').value;
+var email = document.getElementById('email').value;
+var password = document.getElementById('password').value;
+var age = document.getElementById('age').value;
+var smoker = document.getElementsByName('optradio')[0].value;
+var smoker = document.getElementsByName('optradio')[1].value;
+var city = document.getElementById('city').value;
+
+if(name != "" && email != "" && password != "" && age != ""  && smoker != "" && city != "")
+{
+//alert(name + email + password + smoker + age +city  );
+db.transaction(function(transaction) {
+alert("Your are in "+city);
+transaction.executeSql("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,email TEXT NOT NULL,password INTEGER NOT NULL , age INTEGER NOT NULL, smoker TEXT NOT NULL , city TEXT NOT NULL)");
+var sql="INSERT INTO users('name' , 'email', 'password', 'age', 'smoker', 'city') VALUES(?,?,?,?,?,?)";
+
+transaction.executeSql(sql,[name,email,password,age,smoker,city],
+onSuccess
+,onError);
+});
+}
+else
+{
+alert("Error :   Please Fill All Feilds");
+}
+}
+function onSuccess(){
+
+alert("Success : Your Data Save Successfully");
+window.location.href = "index.html";
+}
+function onError(e){
+console.log("Error Occured" +e);
+}
+</script>
+<script>
+function loginUser()
+{//alert();
+var db = window.openDatabase("infonic","1.0","My DataBase",2*1024*1024);
+var loginemail = document.getElementById('loginemail').value;
+var loginpassword = document.getElementById('loginpassword').value;
+//
+//alert(loginemail + loginpassword);
+if(loginemail != "" && loginpassword != ""  )
+{
+db.transaction(function(transaction) {
+var rows="";
+//transaction.executeSql("SELECT * FROM users where email = 'testing@gmail.com' and password = 'test'" ,[],
+transaction.executeSql("SELECT * FROM users where (email = '"+loginemail+"') and (password = '"+loginpassword+"')" ,[],
+//transaction.executeSql("SELECT * FROM users" ,[],
+function(tx, result) {
+var dataLength = result.rows.length;
+//alert(dataLength);
+if(dataLength > 0)
+{
+$.each(result.rows, function( index, value ) {
+if(localStorage) {
+// Store data
+sessionStorage.setItem("loginId", value.id);
+sessionStorage.setItem("loginUsername", value.name);
+sessionStorage.setItem("loginAge", value.age);
+sessionStorage.setItem("loginSmoker", value.smoker);
+
+window.location.href = "new.html";
+}
+});
+}
+else
+{
+alert("No Data in Table");
+}
+}
+)
+});
+}
+else
+{
+alert("Please Fill Correct Value");
+}
+}
+
+</script>
+</head>
+<body style="font-family: 'Titillium Web'">
+<div class="container">
+	<div class="col-md-6 offset-md-3 bg-success mt-3 py-5 border shadow rounded">
+		<div id="loginTab" >
+			<h1 class="text-white text-center">Welcome to ROOMATOR</h1>
+            <br>
+            <h2 class="text-white text-center">User Login</h2>
+			<div class="form-group">
+				<label for="loginemail">Email:</label>
+				<input type="email" class="form-control" id="loginemail" placeholder="Enter email" name="email">
+			</div>
+			<div class="form-group">
+				<label for="loginpassword">Password:</label>
+				<input type="text" class="form-control" id="loginpassword" placeholder="Enter password" name="pswd">
+			</div>
+			
+			<button type="submit" class="btn btn-primary" onclick="loginUser()">Login</button>
+			<p class="text-white myt-md-2">Not a member ?
+				<br> <a  class="text-white" onclick="register()">Click here for registration</a></p>
+				<!--  <a href="new.html" class="text-white"><button>All Users</button></a> --></p>
+				<a href="new.html" class="text-white"> Click to find suitable roommates</a>
+			</div>
+			<div id="registerTab" style="display: none" >
+				<h2 class="text-white text-center">Roomator Registration</h2>
+				<div class="form-group">
+					<input type="hidden" name="city" id="city"/>
+					<label>Name:</label>
+					<input type="text" class="form-control" id="name" placeholder="Enter Name" name="name" required="">
+				</div>
+				<div class="form-group">
+					<label>Email:</label>
+					<input type="email" class="form-control" id="email" placeholder="Enter Email" name="email" required="">
+				</div>
+				<div class="form-group">
+					<label>Password:</label>
+					<input type="text" class="form-control" id="password" placeholder="Enter password" name="password" required="">
+				</div>
+				<!--  <input type="hidden" class="form-control" id="city" > -->
+				<div class="form-group">
+					<label>Smoker:</label>
+					<div class="form-check-inline">
+						<label class="form-check-label">
+							<input type="radio" class="form-check-input" name="optradio" value="Smoker" id="yes">Yes
+						</label>
+					</div>
+					<div class="form-check-inline">
+						<label class="form-check-label">
+							<input type="radio" class="form-check-input" name="optradio" value="No Smoker" id="no">No
+						</label>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="pwd">Age:</label>
+					<input type="number" class="form-control" id="age" placeholder="Enter Age">
+				</div>
+				
+				<button type="submit" class="btn btn-primary mb-md-3" onclick="saveData()">Register</button>
+				<br>
+				<p class="text-white myt-md-2">Already Registered member ?<BR> <a  class="text-white" onclick="login()">Click here to Login</a></p>
+				
+				
+			</div>
+		</body>
+	</html>
+	<script>
+	function register()
+	{
+	document.getElementById("registerTab").style.display = "block";
+	document.getElementById("loginTab").style.display = "none";
+	}
+	function login()
+	{
+	document.getElementById("loginTab").style.display = "block";
+	document.getElementById("registerTab").style.display = "none";
+	}
+	</script>
+	<script type="text/javascript" src="cordova.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
+	<script type="text/javascript">
+	app.initialize();
+	</script>

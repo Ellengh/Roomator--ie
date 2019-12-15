@@ -1,0 +1,279 @@
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<link href="css/sb-admin-2.min.css" rel="stylesheet">
+<style>
+	.bg-success {
+    background-color: #28a745!important;
+}
+</style>
+
+<script>
+var session_id = sessionStorage.getItem("loginId");
+var session_username = sessionStorage.getItem("loginUsername");
+var session_smoker = sessionStorage.getItem("loginSmoker");
+var session_age = sessionStorage.getItem("loginAge");
+
+
+
+
+//alert("Hi This, " + localStorage.getItem("loginusername"));
+//alert(session_id + session_username );
+
+if (typeof session_id === 'undefined' || session_id === null)
+{
+	alert("Please Login First");
+window.location.href = "index.html";
+}
+
+</script>
+
+<!-- <script>
+	var session_id = sessionStorage.getItem("loginId");
+var session_username = localStorage.getItem("loginName");
+//alert(session_id);
+//alert(session_username);
+if (typeof session_id !== 'undefined' && session_id !== null)
+{
+//window.alert("SessionAllreay");
+}
+else
+{
+//window.alert("NoSession");
+
+window.location.href = "index.html"	
+}
+	</script> -->
+<script>
+
+//alert();
+ $.get("http://ipinfo.io", function(response) 
+                            {          
+                                              
+                              var location = response.city;
+                              //alert("Your are In "+location);
+                              var db;
+    db = window.openDatabase("infonic","1.0","My DataBase",2*1024*1024);   
+    db.transaction(function(transaction) {    
+    var rows="";
+    var minAge = parseInt(session_age) - 10;
+    var maxAge = parseInt(session_age) + 10;
+    var Query = "SELECT * FROM users where city = '"+location+"' and smoker = '"+ session_smoker +"'   and age between '"+minAge+"' and '"+maxAge+"' ORDER BY ID DESC";
+    //alert(Query);
+  transaction.executeSql(Query ,[],
+   //transaction.executeSql("SELECT * FROM users" ,[],
+    function(tx, result) {
+    var dataLength = result.rows.length;
+    //console.log(result.rows);   
+    if(dataLength  > 0){   
+     // alert("");
+    $.each(result.rows, function( index, value ) {
+/*   console.log(value);
+    console.log(value.name);
+    console.log(value.email);
+    console.log(value.phone);
+
+    console.log(value.city); */
+
+
+    rows += "<tr onclick='profile("+value.id+")' style='margin-bottom:10px'>"
+    
+        + "<td class='name'>" + value.name + "</td>"
+   
+        + "<td class='city'>" + value.smoker + "</td>"
+         + "<td class='name'>" + value.age + "</td>"
+     
+      
+       /*  + "<td> <a href='editUser(value.id)'>Edit</a> </td>"
+        + "<td><a onclick='deleteUser("+value.id+")'>Delete</a> </td>"*/
+     
+     
+    + "</tr>";
+    });
+   
+    $('#dataTable tbody').append(rows);
+    //console.log(result.rows.item(0).Name);
+    //alert(result.rows.item(0).Name);
+    }else{
+    console.log("No User found");
+    }
+    },
+    function(error) {
+    console.log("Error occurred while getting the data");
+    });
+    });
+    
+
+                            }, "jsonp");  
+
+/* Our Status */
+
+$(document).ready(function(){
+$("#myInput").on("keyup", function() {
+var value = $(this).val().toLowerCase();
+$("#myTable tr").filter(function() {
+$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+});
+});
+});
+
+</script>
+
+
+
+<body id="page-top">
+	<div id="wrapper">
+	<div id="content-wrapper" class="d-flex flex-column">
+		<div id="content">				
+			<nav class="navbar navbar-expand navbar-success bg-success topbar mb-4 static-top shadow">
+				<span class="text-white">Hello <span id="result"></span></span>
+				<ul class="navbar-nav ml-auto">
+					<!-- Nav Item - User Information -->
+					<li class="nav-item dropdown no-arrow text-center">
+					<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">		
+<span class="text-white">Logout</span></a>
+							<!-- Dropdown - User Information -->
+							<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+						
+								<a class="dropdown-item" onclick="logoutFunction()">
+									<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+									Logout
+								</a>
+							</div>
+						</li>
+				
+					</ul>
+				</nav>
+				
+				<div class="container-fluid" id="table">
+					<div class="card shadow mb-4 border bg-success " >
+						<div class="card-header py-3 bg-success text-white">
+							<h6 class="m-0 font-weight-bold">Users Related to 
+								<span id="loginUser"></span>, 
+								<span id="loginSmoker"></span>, 
+								Age Group of <span id="loginAge"></span>
+							</h6>
+						</div>
+						<div class="card-body">
+							<div class="table-responsive">
+								<table class="table table-bordered text-white" id="dataTable" width="100%" cellspacing="0">
+									<thead>
+										<tr>
+											
+											<th>Name</th>
+											
+											<th>Smoker</th>
+											<th>Age</th>
+											
+										</tr>
+									</thead>
+									
+									<tbody>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /.container-fluid -->
+
+				<div class="container-fluid" id="updateForm" style="display: none">
+					<div class="card shadow mb-4 border bg-success  text-white" >
+						<div class="card-header py-3 bg-success">
+							<h6 class="m-0 font-weight-bold">Update  User :  <p id="result"></p></h6>
+						</div>
+						<div class="card-body">
+						<div class="form-group">
+  <input type="hidden" name="city" id="city"/> 
+      <label>Name:</label>
+      <input type="text" class="form-control" id="name" placeholder="Enter Name" name="name" required="">
+    </div>
+ <div class="form-group">
+       <label>Email:</label>
+      <input type="email" class="form-control" id="email" placeholder="Enter Email" name="email" required="">
+    </div>
+   
+
+     <!--  <input type="hidden" class="form-control" id="city" > -->
+
+
+
+
+
+    <button type="submit" class="btn btn-primary mb-md-3" id="Submit" onclick="UpateData()">Udate User</button>
+    </div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+	
+	<a class="scroll-to-top rounded" href="#page-top">
+		<i class="fas fa-angle-up"></i>
+	</a>
+
+</div>
+</body>
+</html>
+
+<script>
+					function logoutFunction()
+					{ // alert();
+						
+						sessionStorage.removeItem("loginId");
+						sessionStorage.removeItem("loginUsername")
+ 						window.location.href = "index.html";
+					}
+					/*function editUser(id)
+					{
+						//alert(id);
+						document.getElementById("table").style.display = "none";
+						document.getElementById("updateForm").style.display = "block";
+     var db;
+    var id = id;
+    db = window.openDatabase("infonic","1.0","My DataBase",2*1024*1024);
+    db.transaction(function (transaction) {
+   
+    var executeQuery = "select * FROM users where Id=?";
+    transaction.executeSql(executeQuery, [id],
+    //Success
+    function (tx, result) {
+    $.each(result.rows, function( index, value ) {
+  document.getElementById("name").value = value.name;
+  document.getElementById("email").value = value.email;
+  document.getElementById("password").value = value.password;
+  //document.getElementById("optradio").value = value.smoker;
+  document.getElementById("age").value = value.age;
+
+
+});
+   //alert(result.name);
+    },
+    //Error
+    function (error) { alert('Data not deleted.'); });
+    });
+					}*/
+				</script>
+
+<script>
+	document.getElementById("result").innerHTML = session_username;
+	document.getElementById("loginUser").innerHTML = session_username;
+	document.getElementById("loginSmoker").innerHTML = session_smoker;
+	document.getElementById("loginAge").innerHTML = session_age;
+</script>
+
+<!-- <script>
+function UpateData()
+{
+alert("Update");
+	}
+	</script> -->
+ <script type="text/javascript" src="cordova.js"></script>
+      <script type="text/javascript" src="js/index.js"></script>
+      <script type="text/javascript">
+      app.initialize();
+      </script>
